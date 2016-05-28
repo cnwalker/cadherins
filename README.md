@@ -7,3 +7,5 @@
 - Maybe arbitrarily cut off distances at some low number
 
 - Make some dank plots
+
+- Check to see if presence of tryptophan correlates with average dehydron distance
