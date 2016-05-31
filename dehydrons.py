@@ -81,17 +81,23 @@ def get_dehydron_and_nterm_distances(nterm_file, dehydron_file):
 def get_distances_from_directories(nterm_dir, dehydron_dir):
     counter = 0
     file_dict = {}
+    raw = []
     nterm_files = filter(lambda x: x.endswith('.pdb'), os.listdir(nterm_dir))
     dehydron_files = filter(lambda x: x.endswith('.pdb'), os.listdir(dehydron_dir))
 
     for i in range(len(nterm_files)):
+        raw = []
+        counter = 0
         protein_code = nterm_files[i].split('/')[-1][:-10]
         file_dict[protein_code] = get_dehydron_and_nterm_distances(nterm_dir + nterm_files[i],
                                                                    dehydron_dir + dehydron_files[i])
         file_dict[protein_code]['average_dehydron_distance'] = 0
         for key in file_dict[protein_code].keys():
-            if key != 'average_dehydron_distance':
+            if key != 'average_dehydron_distance' and key != 'raw':
                 file_dict[protein_code]['average_dehydron_distance'] += file_dict[protein_code][key]['average_distance']
+                raw.append(file_dict[protein_code][key]['average_distance'])
                 counter += 1
-        file_dict[protein_code]['average_dehydron_distance'] /= counter
+        file_dict[protein_code]['average_dehydron_distance'] = sum(raw)/len(raw)
+        file_dict[protein_code]['raw'] = raw
+        print protein_code + ' average distance: ' + str(file_dict[protein_code]['average_dehydron_distance'])
     return file_dict
