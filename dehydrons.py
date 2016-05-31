@@ -68,20 +68,30 @@ def get_dehydron_and_nterm_distances(nterm_file, dehydron_file):
     for i in xrange(len(nterm_list)):
         nterm_info['nterm_' + str(i)] = {
             'size': nterm_list[i].length,
-            'dehydron_distances': []
+            'dehydron_distances': [],
+            'average_distance': 0
         }
         for dehydron in dehydron_list:
             nterm_info['nterm_' + str(i)]['dehydron_distances'].append(get_distance(nterm_list[i], dehydron))
-        nterm_info['nterm_' + str(i)]['dehydron_distances'].sort()
+        cur_nterm_info = nterm_info['nterm_' + str(i)]
+        cur_nterm_info['dehydron_distances'].sort()
+        cur_nterm_info['average_distance'] = sum(cur_nterm_info['dehydron_distances'])/len(cur_nterm_info['dehydron_distances'])
     return nterm_info
 
 def get_distances_from_directories(nterm_dir, dehydron_dir):
+    counter = 0
     file_dict = {}
     nterm_files = filter(lambda x: x.endswith('.pdb'), os.listdir(nterm_dir))
     dehydron_files = filter(lambda x: x.endswith('.pdb'), os.listdir(dehydron_dir))
 
     for i in range(len(nterm_files)):
-        print nterm_dir + nterm_files[i]
-        file_dict[nterm_files[i].split('/')[-1][:-10]] = get_dehydron_and_nterm_distances(nterm_dir + nterm_files[i],
-                                                                            dehydron_dir + dehydron_files[i])
+        protein_code = nterm_files[i].split('/')[-1][:-10]
+        file_dict[protein_code] = get_dehydron_and_nterm_distances(nterm_dir + nterm_files[i],
+                                                                   dehydron_dir + dehydron_files[i])
+        file_dict[protein_code]['average_dehydron_distance'] = 0
+        for key in file_dict[protein_code].keys():
+            if key != 'average_dehydron_distance':
+                file_dict[protein_code]['average_dehydron_distance'] += file_dict[protein_code][key]['average_distance']
+                counter += 1
+        file_dict[protein_code]['average_dehydron_distance'] /= counter
     return file_dict
