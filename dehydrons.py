@@ -1,6 +1,6 @@
 ## Script by Christopher Walker and Ryan McDowell
 ## Digital Biology - CMSC 27610
-import math, pdb_parser
+import os, math, pdb_parser
 
 class Residue(object):
     # Residue object can be either an n-terminus or a dehydron
@@ -27,10 +27,12 @@ def get_residues(residue_path):
                 begin_chain_num = int(line_list[1])
             atom_list.append([line_list[6], line_list[7], line_list[8]])
             chain_num = line_list[5]
+    residue_list.append(Residue(atom_list, len(atom_list)))
     return residue_list
 
-def get_center(atom_list, length):
+def get_center(atom_list):
     center = []
+    length = len(atom_list)
     for i in xrange(len(atom_list[0])): # All atoms in atom list must have same number of dimensions
         center.append(sum(map(lambda x: float(x[i]), atom_list))/length)
     return center
@@ -39,14 +41,14 @@ def get_distance(n_term, dehydron):
     # Input: (List, List)
     # Output: Float
     distance = 0
-    nterm_center = get_center(n_term.atoms, n_term.length)
-    dehydron_center = get_center(dehydron.atoms, dehydron.length)
+    nterm_center = get_center(n_term.atoms)
+    dehydron_center = get_center(dehydron.atoms)
     # n-termini and dehydrons must have same number of dimensions
     for i in xrange(len(nterm_center)):
         distance = (dehydron_center[i] - nterm_center[i])**2
     return math.sqrt(distance)
 
-def get_dehydron_and_nterm_distance(dehydron_file, nterm_file):
+def get_dehydron_and_nterm_distances(nterm_file, dehydron_file):
     # Input: (String, String)
     # Output: Dictionary of dictionaries
     # Function will compute the distances between a pdb file full of dehydrons
@@ -72,3 +74,14 @@ def get_dehydron_and_nterm_distance(dehydron_file, nterm_file):
             nterm_info['nterm_' + str(i)]['dehydron_distances'].append(get_distance(nterm_list[i], dehydron))
         nterm_info['nterm_' + str(i)]['dehydron_distances'].sort()
     return nterm_info
+
+def get_distances_from_directories(nterm_dir, dehydron_dir):
+    file_dict = {}
+    nterm_files = filter(lambda x: x.endswith('.pdb'), os.listdir(nterm_dir))
+    dehydron_files = filter(lambda x: x.endswith('.pdb'), os.listdir(dehydron_dir))
+
+    for i in range(len(nterm_files)):
+        print nterm_dir + nterm_files[i]
+        file_dict[nterm_files[i].split('/')[-1][:-10]] = get_dehydron_and_nterm_distances(nterm_dir + nterm_files[i],
+                                                                            dehydron_dir + dehydron_files[i])
+    return file_dict
