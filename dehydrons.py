@@ -1,6 +1,6 @@
 ## Script by Christopher Walker and Ryan McDowell
 ## Digital Biology - CMSC 27610
-import os, pdb_parser
+import math, pdb_parser
 
 class Residue(object):
     # Residue object can be either an n-terminus or a dehydron
@@ -31,25 +31,22 @@ def get_residues(residue_path):
 
 def get_center(atom_list, length):
     center = []
-    for i in range(len(atom_list)):
-        center.append(sum(map(lambda x: float(x[i]), atom_list))/n_term.length)
+    for i in xrange(len(atom_list[0])): # All atoms in atom list must have same number of dimensions
+        center.append(sum(map(lambda x: float(x[i]), atom_list))/length)
     return center
 
 def get_distance(n_term, dehydron):
     # Input: (List, List)
     # Output: Float
     distance = 0
-    nterm_center = get_center(n_term.atom_list, n_term.length)
-    dehydron_center = get_center(dehydron.atom_list, dehydron.length)
-
-    # BELOW IS NOT DONE
+    nterm_center = get_center(n_term.atoms, n_term.length)
+    dehydron_center = get_center(dehydron.atoms, dehydron.length)
     # n-termini and dehydrons must have same number of dimensions
-    #for i in range(len(nterm_center)):
-    #    nter
+    for i in xrange(len(nterm_center)):
+        distance = (dehydron_center[i] - nterm_center[i])**2
+    return math.sqrt(distance)
 
-    return 0
-
-def get_dehydron_and_nterm_distances(dehydron_path, nterm_path):
+def get_dehydron_and_nterm_distance(dehydron_file, nterm_file):
     # Input: (String, String)
     # Output: Dictionary of dictionaries
     # Function will compute the distances between a pdb file full of dehydrons
@@ -61,16 +58,17 @@ def get_dehydron_and_nterm_distances(dehydron_path, nterm_path):
     #                  }
     # Where <n-terminus_num> is the number the n-terminus occured in the list
 
-    nterm_list = get_residues(nterm_path)
-    dehydron_list = get_residues(dehydron_path)
+    nterm_list = get_residues(nterm_file)
+    dehydron_list = get_residues(dehydron_file)
 
     nterm_info = {}
 
-    for i in range(len(nterm_list)):
+    for i in xrange(len(nterm_list)):
         nterm_info['nterm_' + str(i)] = {
             'size': nterm_list[i].length,
             'dehydron_distances': []
         }
         for dehydron in dehydron_list:
-            nterm_info['dehydron_distances'].append(get_distance(nterm_list[i], dehydron))
-    return n_term
+            nterm_info['nterm_' + str(i)]['dehydron_distances'].append(get_distance(nterm_list[i], dehydron))
+        nterm_info['nterm_' + str(i)]['dehydron_distances'].sort()
+    return nterm_info
