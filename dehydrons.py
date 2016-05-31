@@ -100,4 +100,36 @@ def get_distances_from_directories(nterm_dir, dehydron_dir):
         print protein_code + ' average distance: ' + str(file_dict[protein_code]['average_dehydron_distance'])
     return file_dict
 
+def averages_by_size(distance_dict):
+    size_dict = {}
+    for protein in distance_dict.keys():
+        for nterm_key in distance_dict[protein].keys():
+            if nterm_key[:5] == 'nterm':
+                cur_size = str(distance_dict[protein][nterm_key]['size'])
+                if not size_dict.get(cur_size):
+                    size_dict[cur_size] = []
+                size_dict[cur_size].append(float(distance_dict[protein][nterm_key]['average_distance']))
+
+    size_list = list(size_dict.keys())
+    size_list = list(map(lambda x: int(x), size_list));
+    size_list.sort()
+    size_averages = []
+    for size in size_list:
+        size_averages.append(sum(size_dict[str(size)])/len(size_dict[str(size)]))
+    output_dict = {
+        'sizes': size_list,
+        'averages': size_averages
+    }
+    return output_dict
+
+# get dehydron chain by ID
+# used to retreive dehydrons corresponding to
+##  bonds from WRAPPA
+def get_chain_by_id(input_id):
+    with open(filename) as pdb_file:
+        for line in pdb_file:
+            chain_id = line[23:26].strip()
+            if chain_id == input_id:
+                print line.rstrip("\n")
+
 # print get_distances_from_directories(sys.argv[1], sys.argv[2])
