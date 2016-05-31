@@ -1,6 +1,6 @@
 ## Script by Christopher Walker and Ryan McDowell
 ## Digital Biology - CMSC 27610
-import os, math, pdb_parser
+import os, math, pdb_parser, sys
 
 class Residue(object):
     # Residue object can be either an n-terminus or a dehydron
@@ -95,3 +95,5 @@ def get_distances_from_directories(nterm_dir, dehydron_dir):
                 counter += 1
         file_dict[protein_code]['average_dehydron_distance'] /= counter
     return file_dict
+
+# print get_distances_from_directories(sys.argv[1], sys.argv[2])
